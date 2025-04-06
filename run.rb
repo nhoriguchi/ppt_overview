@@ -1,14 +1,6 @@
 # https://qiita.com/www-tacos/items/4246d5344188d1caa51a
 # これ Box の共有リンクを自動的に得る方法を示唆している。
 
-require 'fileutils'
-require 'yaml'
-require 'optparse'
-require 'digest'
-
-outdir = "tmp_out"
-FileUtils.mkdir_p(outdir)
-
 # 特定のディレクトリ配下を検索する、というモードと、直接ファイルを指定するモードを用意する。
 # 相対パスを表示する (Box Drive の場合、Box 先頭からの相対パス、ただこれ人によって見える範囲が異なる可能性がある。)
 # リンクを貼る、特に Box の共有 URL を見ておきたい
@@ -20,6 +12,14 @@ FileUtils.mkdir_p(outdir)
 
 # インプットの設計をどうするか
 # YAML かな。
+
+require 'fileutils'
+require 'yaml'
+require 'optparse'
+require 'digest'
+
+outdir = "tmp_out"
+FileUtils.mkdir_p(outdir)
 
 options = {
   :outdir => "tmp_out"
@@ -52,9 +52,6 @@ rescue OptionParser::InvalidOption => e
   exit 1
 end
 
-# オプションの内容を表示（デバッグ用）
-puts options.inspect
-
 class PPT
   attr_accessor :mtime
 
@@ -79,10 +76,10 @@ class PPT
       end
     end
 
-    p "generate image files for #{path}"
+    puts "Generate image files for #{path}"
     cmd = "powershell -File ppt2png.ps1 \"#{path}\""
     system cmd
-    p "moved #{dir}/#{@bname_nodig} to #{@options[:outdir]}"
+    puts "Moved #{dir}/#{@bname_nodig} to #{@options[:outdir]}"
     FileUtils.mv("#{dir}/#{@bname_nodig}", "#{@options[:outdir]}/#{@bname}")
     File.write("#{@options[:outdir]}/#{@bname}/path.txt", "#{File.expand_path(path)}")
     File.write("#{@options[:outdir]}/#{@bname}/timestamp.txt", "#{File.mtime(path)}")
@@ -98,7 +95,8 @@ class PPT
     metadata = []
     if File.exist? "#{dir}/path.txt"
       path = File.read("#{dir}/path.txt")
-      metadata.push "- File path: #{path}"
+      tmp_path = path.gsub(/^.*\/Box\//, "Box/")
+      metadata.push "- File path: #{tmp_path}"
     end
     if File.exist? "#{dir}/timestamp.txt"
       tstamp = File.read("#{dir}/timestamp.txt")
@@ -156,4 +154,4 @@ options[:config]["groups"].each do |group|
     end
   end
 end
-File.write("./out.md", mdtext.join("\n\n---\n"))
+File.write("./overview.md", mdtext.join("\n\n---\n"))
