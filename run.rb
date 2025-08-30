@@ -108,7 +108,7 @@ class PPT
 
     1.upto(1000) do |i|
       break unless File.exist? "#{@options[:outdir]}/#{@bname}/#{i}.png"
-      one_section_mdtext.push "<img src='#{@options[:outdir]}/#{@bname}/#{i}.png' width='32%' />"
+      one_section_mdtext.push "<img src='#{@options[:outdir]}/#{@bname}/#{i}.png' />"
     end
 
     return one_section_mdtext.join("\n")

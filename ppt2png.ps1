@@ -20,7 +20,6 @@ $targetBase = [System.IO.Path]::GetFileNameWithoutExtension((Get-Item $targetPat
 $baseFolder = Split-Path -Path $targetPath
 # $baseFolder = "tmp_out"
 $outputFolder = "${baseFolder}\${targetBase}"
-Write-Output "zzz $outputFolder"
 
 $ppt = New-Object -ComObject PowerPoint.Application
 $ppt.Visible = [Microsoft.Office.Core.MsoTriState]::msoTrue
@@ -34,14 +33,29 @@ $pres = $ppt.Presentations.Open("${targetPath}")
 
 # フォルダ名にドットが含まれると勝手に拡張子として判断されて削除されてしまうため、
 # あえて targetPath を指定している。
-$pres.SaveAs("$targetPath", [Microsoft.Office.Interop.PowerPoint.PpSaveAsFileType]::PpSaveAsPNG)
+# $pres.SaveAs("$targetPath", [Microsoft.Office.Interop.PowerPoint.PpSaveAsFileType]::PpSaveAsPNG)
+
+$width = 480
+$height = 270
+# 出力イメージのサイズを指定するには、各スライド別々にエクスポートする必要がある。
+for ($i = 1; $i -le $pres.Slides.Count; $i++) {
+    $slide = $pres.Slides.Item($i)
+    $file  = Join-Path $outputFolder "$i.png"
+
+    if (-not (Test-Path $outputFolder)) {
+        New-Item -ItemType Directory -Path $outputFolder | Out-Null
+    }
+
+    $slide.Export($file, "PNG", $width, $height)
+    Write-Output "Exported: $file"
+}
 
 $pres.Close()
 $ppt.Quit()
 
-# Renaming
-$outputFiles = Get-ChildItem "${outputFolder}\*.png"
-
-for ($i = 1; $i -le $outputFiles.Count; $i++) {
-  Rename-Item -Path "${outputFolder}\スライド$i.PNG" -NewName "${outputFolder}\$i.png"
-}
+# # Renaming
+  # $outputFiles = Get-ChildItem "${outputFolder}\*.png"
+# 
+# for ($i = 1; $i -le $outputFiles.Count; $i++) {
+#   Rename-Item -Path "${outputFolder}\スライド$i.PNG" -NewName "${outputFolder}\$i.png"
+# }

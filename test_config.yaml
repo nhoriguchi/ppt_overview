@@ -1,0 +1,11 @@
+output: "../test_out"
+groups:
+  - name: "files under current directory"
+    type: "directory"
+    path: "sample"
+#   - name: "file list"
+#     type: "file"
+#     path:
+#       - "./file 1.pptx"
+#       - "./file 2.pptx"
+#       - "./dir/file 3.pptx"
